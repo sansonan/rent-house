@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: stayRent
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/room
+logging:
+  level:
+    root: INFO
+    com.system.stayRent: DEBUG
+
+
+
