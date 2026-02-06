@@ -1,6 +1,7 @@
 package com.system.stayRent.service;
 
 import com.system.stayRent.dto.RoomDTO;
+import com.system.stayRent.dto.RoomFilterDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -13,6 +14,9 @@ public interface RoomService {
     Flux<RoomDTO> getAllRooms();
     // case study
     Flux<RoomDTO> searchRoomsByName(String name);
+    Flux<RoomDTO> getRoomByFilter(RoomFilterDTO filterDTO);
+
+
 
 
 }

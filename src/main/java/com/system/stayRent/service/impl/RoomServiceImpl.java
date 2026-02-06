@@ -2,10 +2,14 @@ package com.system.stayRent.service.impl;
 
 import com.system.stayRent.domain.Room;
 import com.system.stayRent.dto.RoomDTO;
+import com.system.stayRent.dto.RoomFilterDTO;
 import com.system.stayRent.exception.RoomNotFoundException;
 import com.system.stayRent.mapper.RoomMapper;
+import com.system.stayRent.repository.RoomCustomRepository;
+import com.system.stayRent.util.RoomCriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,6 +23,7 @@ public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
+    private final RoomCustomRepository roomCustomRepository;
 
 
     @Override
@@ -87,6 +92,12 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Flux<RoomDTO> searchRoomsByName(String name) {
-        return roomRepository.findByNameContainingIgnoreCase(name).map(roomMapper::toRoomDTO);
+        return roomRepository.findByName(name).map(roomMapper::toRoomDTO);
+    }
+
+    @Override
+    public Flux<RoomDTO> getRoomByFilter(RoomFilterDTO filterDTO) {
+        Query query = RoomCriteriaBuilder.build(filterDTO);
+        return  roomCustomRepository.findByFilter(query).map(roomMapper::toRoomDTO);
     }
 }

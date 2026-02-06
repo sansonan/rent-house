@@ -1,6 +1,7 @@
 package com.system.stayRent.controller;
 
 import com.system.stayRent.dto.RoomDTO;
+import com.system.stayRent.mapper.RoomFilterDTOMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import com.system.stayRent.service.RoomService;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -51,5 +53,10 @@ public class RoomController {
     @GetMapping("/search")
     public Flux<RoomDTO> search(@RequestParam(value = "name", required = false) String name) {
         return roomService.searchRoomsByName(name == null ? "" : name);
+    }
+
+    @GetMapping("/filter")
+    public Flux<RoomDTO> filter(@RequestParam Map<String, String> params) {
+        return roomService.getRoomByFilter(RoomFilterDTOMapper.toRoomFilterDTO(params));
     }
 }
