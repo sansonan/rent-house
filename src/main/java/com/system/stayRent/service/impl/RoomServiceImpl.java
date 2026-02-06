@@ -1,6 +1,10 @@
 package com.system.stayRent.service.impl;
 
+import com.system.stayRent.constant.RoomField;
+import com.system.stayRent.constant.RoomSortableField;
+import com.system.stayRent.constant.SortDirection;
 import com.system.stayRent.domain.Room;
+import com.system.stayRent.dto.PageDTO;
 import com.system.stayRent.dto.RoomDTO;
 import com.system.stayRent.dto.RoomFilterDTO;
 import com.system.stayRent.exception.RoomNotFoundException;
@@ -9,12 +13,17 @@ import com.system.stayRent.repository.RoomCustomRepository;
 import com.system.stayRent.util.RoomCriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import com.system.stayRent.repository.RoomRepository;
 import com.system.stayRent.service.RoomService;
+import reactor.util.function.Tuple2;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -43,27 +52,6 @@ public class RoomServiceImpl implements RoomService {
                 .doOnNext(room -> log.info("Room found: {}", room))
                 .map(roomMapper::toRoomDTO);
     }
-
-    @Override
-    public Mono<RoomDTO> updateRoom(String id, RoomDTO roomDTO) {
-        log.debug("Updating room by id:  {} with data : {}", id, roomDTO);
-        return roomRepository.findById(id)
-                .switchIfEmpty(Mono.error(new RoomNotFoundException(id)))
-                .flatMap(existingRoom -> {
-                    existingRoom.setName(roomDTO.getName());
-                    existingRoom.setAttributes(roomDTO.getAttributes());
-                    return roomRepository.save(existingRoom);
-                })
-                .map(roomMapper::toRoomDTO);
-        //Target: update existing object room
-        /*
-        get from db
-        update new value
-        save into db
-         */
-    }
-
-
     // Add function add Mapper
     @Override
     public Mono<RoomDTO> updateRoomMapper(String id, RoomDTO roomDTO) {
@@ -90,14 +78,78 @@ public class RoomServiceImpl implements RoomService {
         return roomRepository.findAll().map(roomMapper::toRoomDTO);
     }
 
-    @Override
-    public Flux<RoomDTO> searchRoomsByName(String name) {
-        return roomRepository.findByName(name).map(roomMapper::toRoomDTO);
-    }
 
     @Override
     public Flux<RoomDTO> getRoomByFilter(RoomFilterDTO filterDTO) {
         Query query = RoomCriteriaBuilder.build(filterDTO);
         return  roomCustomRepository.findByFilter(query).map(roomMapper::toRoomDTO);
     }
+
+    @Override
+    public Mono<PageDTO<RoomDTO>> getRoomByFilterPagination(RoomFilterDTO filterDTO) {
+        // Base query (filters only)
+        Query baseQuery = RoomCriteriaBuilder.build(filterDTO);
+
+        //  Content query (with pagination)
+        Query pageQuery = Query.of(baseQuery)
+                .with(buildMultiSort(filterDTO))
+                .skip((long) filterDTO.getPage() * filterDTO.getSize())
+                .limit(filterDTO.getSize());
+
+        // Fetch page content
+        Flux<RoomDTO> contentFlux =
+                roomCustomRepository.findByFilter(pageQuery)
+                        .map(roomMapper::toRoomDTO);
+
+        // Count total elements (NO pagination)
+        Mono<Long> countMono =
+                roomCustomRepository.countByFilter(baseQuery);
+
+        // Build page response
+        return Mono.zip(countMono, contentFlux.collectList())
+                .map(tuple -> {
+                    long total = tuple.getT1();
+                    List<RoomDTO> content = tuple.getT2();
+
+                    int totalPages = (int) Math.ceil(
+                            (double) total / filterDTO.getSize()
+                    );
+
+                    return new PageDTO<>(
+                            filterDTO.getPage(),
+                            filterDTO.getSize(),
+                            total,
+                            totalPages,
+                            content
+                    );
+                });
+
+    }
+
+    private Sort buildMultiSort(RoomFilterDTO filterDTO) {
+
+        if (filterDTO.getSortBy() == null || filterDTO.getSortBy().isEmpty()) {
+            return Sort.by(Sort.Direction.ASC, RoomField.NAME.value());
+        }
+
+        Sort.Direction direction =
+                filterDTO.getSortDir() == SortDirection.DESC
+                        ? Sort.Direction.DESC
+                        : Sort.Direction.ASC;
+
+        List<Sort.Order> orders = new ArrayList<>();
+
+        for (String sort : filterDTO.getSortBy()) {
+            orders.add(
+                    new Sort.Order(
+                            direction,
+                            RoomSortableField.safeValue(sort)
+                    )
+            );
+        }
+
+        return Sort.by(orders);
+    }
+
+
 }

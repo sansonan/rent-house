@@ -1,17 +1,18 @@
 package com.system.stayRent.controller;
 
+import com.system.stayRent.dto.PageDTO;
 import com.system.stayRent.dto.RoomDTO;
-import com.system.stayRent.mapper.RoomFilterDTOMapper;
+import com.system.stayRent.dto.RoomFilterDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import com.system.stayRent.service.RoomService;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -48,15 +49,27 @@ public class RoomController {
         return roomService.getAllRooms();
     }
 
-
-    //For case study
-    @GetMapping("/search")
-    public Flux<RoomDTO> search(@RequestParam(value = "name", required = false) String name) {
-        return roomService.searchRoomsByName(name == null ? "" : name);
+//    @GetMapping("/filter")
+//    public Flux<RoomDTO> filter(@ModelAttribute RoomFilterDTO roomFilterDTO) {
+//        return roomService.getRoomByFilter(roomFilterDTO);
+//    }
+    @GetMapping("/filter")
+    public Flux<RoomDTO> filter(RoomFilterDTO roomFilterDTO) {
+        return roomService.getRoomByFilter(roomFilterDTO);
+    }
+    @GetMapping("/search/pagination")
+    public Mono<PageDTO<RoomDTO>> getRoomByFilterPagination(RoomFilterDTO roomFilterDTO) {
+        return roomService.getRoomByFilterPagination(roomFilterDTO);
     }
 
-    @GetMapping("/filter")
-    public Flux<RoomDTO> filter(@RequestParam Map<String, String> params) {
-        return roomService.getRoomByFilter(RoomFilterDTOMapper.toRoomFilterDTO(params));
+    //version case study
+    @GetMapping("search/pg")
+    public Mono<ResponseEntity<PageDTO<RoomDTO>>> getRoomByFilterPaginationWithHeader(RoomFilterDTO roomFilterDTO) {
+        return  roomService.getRoomByFilterPagination(roomFilterDTO)
+                .map(page -> ResponseEntity.ok()
+                        .header("X-Total-Count", String.valueOf(page.getTotalElements()))
+                        .body(page)
+                );
+
     }
 }
