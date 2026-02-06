@@ -4,6 +4,10 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost:27017/room
+
+server:
+  port: 8081
+
 logging:
   level:
     root: INFO

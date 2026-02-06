@@ -4,15 +4,24 @@ import com.system.stayRent.domain.Room;
 import com.system.stayRent.dto.RoomDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.stereotype.Component;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+
+@Mapper(
+        componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+)
 public interface RoomMapper {
 
     // Request → Entity (ignore id)
-    @Mapping(target = "id", ignore = true)
+
     Room toRoom(RoomDTO roomDTO);
     RoomDTO toRoomDTO(Room room);
+
+    @Mapping(target = "id", ignore = true)
+    void updateRoomFromDTO(RoomDTO dto, @MappingTarget Room entity);
+
 
 //    public  RoomDTO toRoomDto (Room room) {
 //        RoomDTO dto = new RoomDTO();
