@@ -1,8 +1,5 @@
 package com.system.stayRent.service.impl;
 
-import com.system.stayRent.constant.RoomField;
-import com.system.stayRent.constant.RoomSortableField;
-import com.system.stayRent.constant.SortDirection;
 import com.system.stayRent.domain.Room;
 import com.system.stayRent.dto.PageDTO;
 import com.system.stayRent.dto.RoomDTO;
@@ -13,7 +10,6 @@ import com.system.stayRent.repository.RoomCustomRepository;
 import com.system.stayRent.util.RoomCriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -21,11 +17,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import com.system.stayRent.repository.RoomRepository;
 import com.system.stayRent.service.RoomService;
-import reactor.util.function.Tuple2;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+
 
 @Service
 @Slf4j
@@ -94,7 +88,7 @@ public class RoomServiceImpl implements RoomService {
                 .skip((long) filterDTO.getPage() * filterDTO.getSize())
                 .limit(filterDTO.getSize());
 
-        query.with(Objects.requireNonNull(RoomCriteriaBuilder.sort(filterDTO)));
+        query.with(RoomCriteriaBuilder.sort(filterDTO));
 
         // Fetch page content
         Flux<RoomDTO> contentFlux =

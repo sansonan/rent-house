@@ -62,9 +62,9 @@ public class RoomController {
         return roomService.getRoomByFilterPagination(roomFilterDTO);
     }
 
-    //version case study
+    //version with header
     @GetMapping("search/pg")
-    public Mono<ResponseEntity<PageDTO<RoomDTO>>> getRoomByFilterPaginationWithHeader(RoomFilterDTO roomFilterDTO) {
+    public Mono<ResponseEntity<PageDTO<RoomDTO>>> getRoomByFilterPaginationWithHeader(@Valid RoomFilterDTO roomFilterDTO) {
         return  roomService.getRoomByFilterPagination(roomFilterDTO)
                 .map(page -> ResponseEntity.ok()
                         .header("X-Total-Count", String.valueOf(page.getTotalElements()))
