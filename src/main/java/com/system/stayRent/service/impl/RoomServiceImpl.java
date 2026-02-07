@@ -14,6 +14,7 @@ import com.system.stayRent.util.RoomCriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -24,6 +25,7 @@ import reactor.util.function.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -79,31 +81,27 @@ public class RoomServiceImpl implements RoomService {
     }
 
 
-    @Override
-    public Flux<RoomDTO> getRoomByFilter(RoomFilterDTO filterDTO) {
-        Query query = RoomCriteriaBuilder.build(filterDTO);
-        return  roomCustomRepository.findByFilter(query).map(roomMapper::toRoomDTO);
-    }
 
     @Override
     public Mono<PageDTO<RoomDTO>> getRoomByFilterPagination(RoomFilterDTO filterDTO) {
         // Base query (filters only)
-        Query baseQuery = RoomCriteriaBuilder.build(filterDTO);
+        Criteria criteria = RoomCriteriaBuilder.build(filterDTO);
+        // Count total elements (NO pagination)
+        Mono<Long> countMono = roomCustomRepository.countByFilter(new Query(criteria));
 
         //  Content query (with pagination)
-        Query pageQuery = Query.of(baseQuery)
-                .with(buildMultiSort(filterDTO))
+        Query query = new Query(criteria)
                 .skip((long) filterDTO.getPage() * filterDTO.getSize())
                 .limit(filterDTO.getSize());
 
+        query.with(Objects.requireNonNull(RoomCriteriaBuilder.sort(filterDTO)));
+
         // Fetch page content
         Flux<RoomDTO> contentFlux =
-                roomCustomRepository.findByFilter(pageQuery)
+                roomCustomRepository.findByFilter(query)
                         .map(roomMapper::toRoomDTO);
 
-        // Count total elements (NO pagination)
-        Mono<Long> countMono =
-                roomCustomRepository.countByFilter(baseQuery);
+
 
         // Build page response
         return Mono.zip(countMono, contentFlux.collectList())
@@ -126,30 +124,7 @@ public class RoomServiceImpl implements RoomService {
 
     }
 
-    private Sort buildMultiSort(RoomFilterDTO filterDTO) {
 
-        if (filterDTO.getSortBy() == null || filterDTO.getSortBy().isEmpty()) {
-            return Sort.by(Sort.Direction.ASC, RoomField.NAME.value());
-        }
-
-        Sort.Direction direction =
-                filterDTO.getSortDir() == SortDirection.DESC
-                        ? Sort.Direction.DESC
-                        : Sort.Direction.ASC;
-
-        List<Sort.Order> orders = new ArrayList<>();
-
-        for (String sort : filterDTO.getSortBy()) {
-            orders.add(
-                    new Sort.Order(
-                            direction,
-                            RoomSortableField.safeValue(sort)
-                    )
-            );
-        }
-
-        return Sort.by(orders);
-    }
 
 
 }

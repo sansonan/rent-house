@@ -24,8 +24,12 @@ public class RoomFilterDTO {
 
     private int size =10;
     private int page = 0;
-    private List<String> sortBy;
-    private SortDirection sortDir;
+
+    @Schema(description = "sort by field name ")
+    private String sortBy;
+
+    @Schema(description = "Sort direction : asc , desc , example = 'asc' ")
+    private String direction;
 
 
 }

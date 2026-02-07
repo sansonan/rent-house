@@ -53,10 +53,10 @@ public class RoomController {
 //    public Flux<RoomDTO> filter(@ModelAttribute RoomFilterDTO roomFilterDTO) {
 //        return roomService.getRoomByFilter(roomFilterDTO);
 //    }
-    @GetMapping("/filter")
-    public Flux<RoomDTO> filter(RoomFilterDTO roomFilterDTO) {
-        return roomService.getRoomByFilter(roomFilterDTO);
-    }
+//    @GetMapping("/filter")
+//    public Flux<RoomDTO> filter(RoomFilterDTO roomFilterDTO) {
+//        return roomService.getRoomByFilter(roomFilterDTO);
+//    }
     @GetMapping("/search/pagination")
     public Mono<PageDTO<RoomDTO>> getRoomByFilterPagination(RoomFilterDTO roomFilterDTO) {
         return roomService.getRoomByFilterPagination(roomFilterDTO);

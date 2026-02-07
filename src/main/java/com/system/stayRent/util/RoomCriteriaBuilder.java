@@ -2,6 +2,7 @@ package com.system.stayRent.util;
 
 import com.system.stayRent.constant.RoomField;
 import com.system.stayRent.dto.RoomFilterDTO;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 
 import org.springframework.data.mongodb.core.query.Query;
@@ -9,7 +10,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import java.util.Objects;
 
 public class RoomCriteriaBuilder {
-    public static Query build(RoomFilterDTO filter){
+    public static Criteria build(RoomFilterDTO filter){
         Criteria criteria = new Criteria();
 
         if(Objects.nonNull(filter.getName())){
@@ -20,7 +21,7 @@ public class RoomCriteriaBuilder {
         }
         if(Objects.nonNull(filter.getPrice()) && Objects.nonNull(filter.getPriceOp())){
             switch (filter.getPriceOp()){
-                case "lt" -> criteria.and(RoomField.PRICE.value()).gte(filter.getPrice());
+                case "lt" -> criteria.and(RoomField.PRICE.value()).lt(filter.getPrice());
                 case "lte" -> criteria.and(RoomField.PRICE.value()).lte(filter.getPrice());
                 case "gt" -> criteria.and(RoomField.PRICE.value()).gt(filter.getPrice());
                 case "gte" -> criteria.and(RoomField.PRICE.value()).gte(filter.getPrice());
@@ -31,7 +32,25 @@ public class RoomCriteriaBuilder {
             criteria.and(RoomField.PRICE.value()).gte(filter.getMinPrice()).lte(filter.getMaxPrice());
         }
 
-       Query query = new Query(criteria);
-        return query;
+//       Query query = new Query(criteria);
+        return criteria;
     }
+    public static Sort sort(RoomFilterDTO filter) {
+        //sort direction
+        Sort.Direction direction = Sort.Direction.ASC;
+        if ("desc".equalsIgnoreCase(filter.getDirection())) {
+            direction = Sort.Direction.DESC;
+        }
+        if ("asc".equalsIgnoreCase(filter.getDirection())) {
+            direction = Sort.Direction.ASC;
+        }
+
+        //sort field
+        String sortField = filter.getSortBy();
+        ;
+
+
+        return Sort.by(direction, sortField);
+    }
+
 }
