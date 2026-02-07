@@ -5,8 +5,6 @@ import com.system.stayRent.dto.RoomFilterDTO;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 
-import org.springframework.data.mongodb.core.query.Query;
-
 import java.util.Objects;
 
 public class RoomCriteriaBuilder {
@@ -44,12 +42,16 @@ public class RoomCriteriaBuilder {
         if ("asc".equalsIgnoreCase(filter.getDirection())) {
             direction = Sort.Direction.ASC;
         }
-
         //sort field
         String sortField = filter.getSortBy();
-        ;
-
-
+        if(!sortField.contains(".")){
+            if(sortField.equals("name")){
+                sortField = "attributes."+sortField;
+            }
+            if (sortField.equals("price")){
+                sortField = "price."+sortField;
+            }
+        }
         return Sort.by(direction, sortField);
     }
 
