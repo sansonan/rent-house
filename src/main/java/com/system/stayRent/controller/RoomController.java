@@ -3,12 +3,16 @@ package com.system.stayRent.controller;
 import com.system.stayRent.dto.PageDTO;
 import com.system.stayRent.dto.RoomDTO;
 import com.system.stayRent.dto.RoomFilterDTO;
+import com.system.stayRent.dto.RoomImportSummaryResponseDTO;
+import com.system.stayRent.service.RoomImportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,6 +23,7 @@ import com.system.stayRent.service.RoomService;
 @RequestMapping("/api/rooms")
 public class RoomController {
     private final RoomService roomService;
+    private final RoomImportService roomImportService;
 
     @PostMapping
     @Operation(summary = "Create Room")
@@ -63,7 +68,7 @@ public class RoomController {
     }
 
     //version with header
-    @GetMapping("search/pg")
+    @GetMapping("search/pagination2")
     public Mono<ResponseEntity<PageDTO<RoomDTO>>> getRoomByFilterPaginationWithHeader(@Valid RoomFilterDTO roomFilterDTO) {
         return  roomService.getRoomByFilterPagination(roomFilterDTO)
                 .map(page -> ResponseEntity.ok()
@@ -71,5 +76,10 @@ public class RoomController {
                         .body(page)
                 );
 
+    }
+
+    @PostMapping(value = "/upload-excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Mono<RoomImportSummaryResponseDTO> uploadExcel(@RequestPart("file") FilePart filePart) {
+        return roomImportService.importRoom(filePart);
     }
 }
