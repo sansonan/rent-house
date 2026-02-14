@@ -3,8 +3,7 @@ package com.system.stayRent.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.NonNull;
-import lombok.Singular;
+
 
 import java.util.Map;
 

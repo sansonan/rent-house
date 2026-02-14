@@ -63,7 +63,7 @@ public class RoomController {
     }
 
     //version with header
-    @GetMapping("search/pg")
+    @GetMapping("search/pagination2")
     public Mono<ResponseEntity<PageDTO<RoomDTO>>> getRoomByFilterPaginationWithHeader(@Valid RoomFilterDTO roomFilterDTO) {
         return  roomService.getRoomByFilterPagination(roomFilterDTO)
                 .map(page -> ResponseEntity.ok()

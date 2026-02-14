@@ -30,7 +30,6 @@ public class RoomServiceImpl implements RoomService {
     private final RoomMapper roomMapper;
     private final RoomCustomRepository roomCustomRepository;
 
-
     @Override
     public Mono<RoomDTO> createRoom(RoomDTO roomDTO) {
         log.debug("Saving room to DB: {}", roomDTO);
@@ -75,7 +74,6 @@ public class RoomServiceImpl implements RoomService {
     }
 
 
-
     @Override
     public Mono<PageDTO<RoomDTO>> getRoomByFilterPagination(RoomFilterDTO filterDTO) {
         // Base query (filters only)
@@ -94,8 +92,6 @@ public class RoomServiceImpl implements RoomService {
         Flux<RoomDTO> contentFlux =
                 roomCustomRepository.findByFilter(query)
                         .map(roomMapper::toRoomDTO);
-
-
 
         // Build page response
         return Mono.zip(countMono, contentFlux.collectList())
