@@ -74,6 +74,13 @@ public class RoomServiceImpl implements RoomService {
         return roomRepository.findAll().map(roomMapper::toRoomDTO);
     }
 
+    @Override
+    public Flux<RoomDTO> getRoomByFilter(RoomFilterDTO filterDTO) {
+        Criteria criteria = RoomCriteriaBuilder.build(filterDTO);
+
+        return roomCustomRepository.findByFilter(new Query(criteria))
+                .map(roomMapper::toRoomDTO);
+    }
 
 
     @Override

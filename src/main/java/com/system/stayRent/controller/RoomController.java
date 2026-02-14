@@ -82,4 +82,9 @@ public class RoomController {
     public Mono<RoomImportSummaryResponseDTO> uploadExcel(@RequestPart("file") FilePart filePart) {
         return roomImportService.importRoom(filePart);
     }
+
+    @GetMapping("/search")
+    public Flux<RoomDTO> getRoomByFilter(RoomFilterDTO roomFilterDTO){
+        return roomService.getRoomByFilter(roomFilterDTO);
+    }
 }

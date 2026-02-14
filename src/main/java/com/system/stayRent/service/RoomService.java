@@ -14,6 +14,8 @@ public interface RoomService {
     Mono<Void> deleteRoom(String id);
     Flux<RoomDTO> getAllRooms();
  //   Flux<RoomDTO> getRoomByFilter(RoomFilterDTO filterDTO);
+
+    Flux<RoomDTO> getRoomByFilter(RoomFilterDTO filterDTO);
     Mono<PageDTO<RoomDTO>> getRoomByFilterPagination(RoomFilterDTO filterDTO);
 
 
