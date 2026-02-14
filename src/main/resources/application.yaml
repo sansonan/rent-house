@@ -3,7 +3,12 @@ spring:
     name: stayRent
   data:
     mongodb:
-      uri: mongodb://localhost:27017/room
+#      uri: mongodb://localhost:27017/room
+      host: localhost
+      port: 27017
+      username: root
+      password: 123456
+      authentication-database: admin
 
 server:
   port: 8081
